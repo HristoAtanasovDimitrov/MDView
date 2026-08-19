@@ -1,0 +1,63 @@
+{
+  "name": "mdview",
+  "productName": "MDView",
+  "version": "1.3.2",
+  "description": "MDView",
+  "author": "Hristo Dimitrov",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.hristodimitrov.mdview",
+    "productName": "MDView",
+    "artifactName": "MDView-Setup-${version}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": true,
+      "include": "build/installer.nsh"
+    },
+    "fileAssociations": [
+      {
+        "ext": "md",
+        "name": "Markdown Document",
+        "description": "Markdown document",
+        "icon": "build/icon.ico",
+        "role": "Editor"
+      },
+      {
+        "ext": "markdown",
+        "name": "Markdown Document",
+        "description": "Markdown document",
+        "icon": "build/icon.ico",
+        "role": "Editor"
+      },
+      {
+        "ext": "mdown",
+        "name": "Markdown Document",
+        "description": "Markdown document",
+        "icon": "build/icon.ico",
+        "role": "Editor"
+      }
+    ]
+  }
+}
