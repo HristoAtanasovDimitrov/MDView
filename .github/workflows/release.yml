@@ -31,3 +31,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # No signing certificates: build unsigned apps
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Publish the release (electron-builder leaves it as draft)
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
