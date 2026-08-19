@@ -42,15 +42,17 @@ jobs:
             "$APP" --remote-debugging-port=9333 /tmp/test.md &
           fi
 
-          # Wait for the DevTools endpoint, then check what the renderer loaded
+          # Poll the DevTools endpoint until the renderer has loaded the document
+          # (the endpoint comes up before page JS runs, so keep polling until
+          # the page title shows the opened file)
           ok=""
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             sleep 1
-            if curl -sf http://127.0.0.1:9333/json -o /tmp/pages.json; then ok=1; break; fi
+            if curl -sf http://127.0.0.1:9333/json -o /tmp/pages.json 2>/dev/null; then
+              if grep -q "test.md" /tmp/pages.json; then ok=1; break; fi
+            fi
           done
-          test -n "$ok" || { echo "DevTools endpoint never came up"; exit 1; }
-          cat /tmp/pages.json
-
+          cat /tmp/pages.json || true
+          test -n "$ok" || { echo "FAIL: renderer never showed test.md"; exit 1; }
           grep -q "MDView" /tmp/pages.json || { echo "FAIL: app title not found"; exit 1; }
-          grep -q "test.md" /tmp/pages.json || { echo "FAIL: test.md was not opened"; exit 1; }
           echo "SMOKE TEST PASSED: app launched and opened test.md on $RUNNER_OS"
