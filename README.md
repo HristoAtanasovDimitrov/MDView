@@ -2,6 +2,15 @@
 
 A fast, dark markdown viewer and editor for Windows.
 
+![Reading view](docs/screenshot-view.png)
+
+<details>
+<summary>Edit mode with split live preview</summary>
+
+![Edit mode](docs/screenshot-edit.png)
+
+</details>
+
 ## Two ways to use it
 
 | Flavor | Where | Notes |
