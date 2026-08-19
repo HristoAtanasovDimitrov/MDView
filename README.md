@@ -1,6 +1,6 @@
 # MDView
 
-A fast, simple markdown viewer and editor for Windows, macOS, and Linux.
+A fast, simple Markdown viewer and editor.
 
 ![Reading view](docs/screenshot-view.png)
 
