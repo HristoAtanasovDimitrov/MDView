@@ -1,0 +1,56 @@
+name: Smoke test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build unpacked app
+        run: npx electron-builder --dir
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Launch app with a test file and probe the renderer
+        shell: bash
+        run: |
+          set -e
+          printf '# Smoke Test\n\nHello from CI\n' > /tmp/test.md
+
+          APP=$(find dist -type f \( -path "*MacOS/MDView" -o -path "*linux-unpacked/mdview" -o -path "*linux-unpacked/MDView" \) 2>/dev/null | head -1)
+          echo "launching: $APP"
+          test -n "$APP"
+
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq xvfb
+            xvfb-run -a "$APP" --no-sandbox --remote-debugging-port=9333 /tmp/test.md &
+          else
+            "$APP" --remote-debugging-port=9333 /tmp/test.md &
+          fi
+
+          # Wait for the DevTools endpoint, then check what the renderer loaded
+          ok=""
+          for i in $(seq 1 30); do
+            sleep 1
+            if curl -sf http://127.0.0.1:9333/json -o /tmp/pages.json; then ok=1; break; fi
+          done
+          test -n "$ok" || { echo "DevTools endpoint never came up"; exit 1; }
+          cat /tmp/pages.json
+
+          grep -q "MDView" /tmp/pages.json || { echo "FAIL: app title not found"; exit 1; }
+          grep -q "test.md" /tmp/pages.json || { echo "FAIL: test.md was not opened"; exit 1; }
+          echo "SMOKE TEST PASSED: app launched and opened test.md on $RUNNER_OS"
