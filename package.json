@@ -61,21 +61,18 @@
         "ext": "md",
         "name": "Markdown Document",
         "description": "Markdown document",
-        "icon": "build/icon.ico",
         "role": "Editor"
       },
       {
         "ext": "markdown",
         "name": "Markdown Document",
         "description": "Markdown document",
-        "icon": "build/icon.ico",
         "role": "Editor"
       },
       {
         "ext": "mdown",
         "name": "Markdown Document",
         "description": "Markdown document",
-        "icon": "build/icon.ico",
         "role": "Editor"
       }
     ]
