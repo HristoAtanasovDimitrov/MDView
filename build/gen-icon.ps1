@@ -96,3 +96,29 @@ $bw.Flush()
 $icoPath = Join-Path $PSScriptRoot "icon.ico"
 [System.IO.File]::WriteAllBytes($icoPath, $out.ToArray())
 Write-Host "Wrote $icoPath ($($out.Length) bytes, $($icoPngs.Count) sizes) and icon.png (512px)"
+
+# Assemble ICNS container for macOS (PNG payload entries, big-endian sizes)
+function Write-BE([System.IO.Stream]$s, [uint32]$v) {
+    $b = [BitConverter]::GetBytes($v)
+    [Array]::Reverse($b)
+    $s.Write($b, 0, 4)
+}
+$icnsTypes = @{ 128 = "ic07"; 256 = "ic08"; 512 = "ic09" }
+$entries = @()
+foreach ($entry in $pngs) {
+    if ($icnsTypes.ContainsKey([int]$entry[0])) {
+        $entries += , @($icnsTypes[[int]$entry[0]], $entry[1])
+    }
+}
+$total = 8
+foreach ($e in $entries) { $total += 8 + $e[1].Length }
+$icns = New-Object System.IO.MemoryStream
+$icns.Write([System.Text.Encoding]::ASCII.GetBytes("icns"), 0, 4)
+Write-BE $icns ([uint32]$total)
+foreach ($e in $entries) {
+    $icns.Write([System.Text.Encoding]::ASCII.GetBytes($e[0]), 0, 4)
+    Write-BE $icns ([uint32](8 + $e[1].Length))
+    $icns.Write($e[1], 0, $e[1].Length)
+}
+[System.IO.File]::WriteAllBytes((Join-Path $PSScriptRoot "icon.icns"), $icns.ToArray())
+Write-Host "Wrote icon.icns ($($icns.Length) bytes, $($entries.Count) sizes)"
