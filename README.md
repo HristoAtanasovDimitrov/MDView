@@ -1,6 +1,6 @@
 # MDView
 
-A fast, dark markdown viewer and editor for Windows.
+A fast, simple markdown viewer and editor for Windows.
 
 ![Reading view](docs/screenshot-view.png)
 
