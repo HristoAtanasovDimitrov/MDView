@@ -1,7 +1,7 @@
 {
   "name": "mdview",
   "productName": "MDView",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "MDView",
   "author": "Hristo Dimitrov",
   "license": "MIT",
@@ -26,9 +26,29 @@
       "preload.js",
       "app/**/*"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "HristoAtanasovDimitrov",
+      "repo": "MDView",
+      "releaseType": "release"
+    },
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "build/icon.png",
+      "category": "Utility",
+      "maintainer": "Hristo Dimitrov",
+      "synopsis": "Dark markdown viewer and editor"
     },
     "nsis": {
       "oneClick": true,

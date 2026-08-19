@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Drawing
 
-$sizes = 16, 24, 32, 48, 64, 128, 256
+$sizes = 16, 24, 32, 48, 64, 128, 256, 512
 $pngs = @()
 
 foreach ($s in $sizes) {
@@ -61,15 +61,24 @@ foreach ($s in $sizes) {
     $bmp.Dispose()
 }
 
-# Assemble ICO container (PNG-compressed entries)
+# The 512px render becomes the PNG icon for macOS/Linux builds
+foreach ($entry in $pngs) {
+    if ($entry[0] -eq 512) {
+        [System.IO.File]::WriteAllBytes((Join-Path $PSScriptRoot "icon.png"), $entry[1])
+    }
+}
+
+# Assemble ICO container from sizes <= 256 (ICO spec limit)
+$icoPngs = @()
+foreach ($entry in $pngs) { if ($entry[0] -le 256) { $icoPngs += , $entry } }
 $out = New-Object System.IO.MemoryStream
 $bw = New-Object System.IO.BinaryWriter($out)
 $bw.Write([UInt16]0)               # reserved
 $bw.Write([UInt16]1)               # type: icon
-$bw.Write([UInt16]$pngs.Count)     # count
+$bw.Write([UInt16]$icoPngs.Count)  # count
 
-$offset = 6 + 16 * $pngs.Count
-foreach ($entry in $pngs) {
+$offset = 6 + 16 * $icoPngs.Count
+foreach ($entry in $icoPngs) {
     $s = $entry[0]; $data = $entry[1]
     $bw.Write([Byte]($(if ($s -ge 256) { 0 } else { $s })))  # width
     $bw.Write([Byte]($(if ($s -ge 256) { 0 } else { $s })))  # height
@@ -81,12 +90,9 @@ foreach ($entry in $pngs) {
     $bw.Write([UInt32]$offset)
     $offset += $data.Length
 }
-foreach ($entry in $pngs) { $bw.Write($entry[1]) }
+foreach ($entry in $icoPngs) { $bw.Write($entry[1]) }
 $bw.Flush()
 
 $icoPath = Join-Path $PSScriptRoot "icon.ico"
 [System.IO.File]::WriteAllBytes($icoPath, $out.ToArray())
-Write-Host "Wrote $icoPath ($($out.Length) bytes, $($pngs.Count) sizes)"
-
-# Also save a 256px PNG for reference/preview
-[System.IO.File]::WriteAllBytes((Join-Path $PSScriptRoot "icon-256.png"), ($pngs | Where-Object { $_[0] -eq 256 })[0][1])
+Write-Host "Wrote $icoPath ($($out.Length) bytes, $($icoPngs.Count) sizes) and icon.png (512px)"

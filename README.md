@@ -1,6 +1,6 @@
 # MDView
 
-A fast, simple markdown viewer and editor for Windows.
+A fast, simple markdown viewer and editor for Windows, macOS, and Linux.
 
 ![Reading view](docs/screenshot-view.png)
 
@@ -11,12 +11,17 @@ A fast, simple markdown viewer and editor for Windows.
 
 </details>
 
-## Two ways to use it
+## Download
 
-| Flavor | Where | Notes |
-|--------|-------|-------|
-| Standalone page | [MDView.html](MDView.html) | Zero-install; open in Edge/Chrome |
-| Desktop app | `dist/MDView-Setup-<version>.exe` (built via `npm run dist`) | Installs per-user, associates `.md` files |
+Grab the latest build from [Releases](https://github.com/HristoAtanasovDimitrov/MDView/releases):
+
+| Platform | File | Notes |
+|----------|------|-------|
+| Windows | `MDView-Setup-<version>.exe` | Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
+| macOS | `MDView-<version>-<arch>.dmg` | `arm64` for Apple Silicon, `x64` for Intel. Unsigned: right-click the app → Open the first time |
+| Linux | `MDView-<version>.AppImage` or `.deb` | AppImage: `chmod +x` and run |
+
+There is also a zero-install flavor: open [MDView.html](MDView.html) in Edge/Chrome.
 
 ## Features
 

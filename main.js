@@ -44,7 +44,18 @@ if (!gotLock) {
     }
   });
 
+  // macOS delivers file-association opens via this event, not argv.
+  app.on("open-file", (e, filePath) => {
+    e.preventDefault();
+    if (win) sendOpen(filePath);
+    else pendingPath = filePath;
+  });
+
   app.whenReady().then(createWindow);
+
+  app.on("activate", () => {
+    if (!win) createWindow();
+  });
 }
 
 function createWindow() {
