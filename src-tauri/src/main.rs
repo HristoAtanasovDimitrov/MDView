@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::Serialize;
-use std::{env, fs, path::Path};
+use std::{env, fs, path::Path, sync::Mutex};
 use tauri::{Emitter, Manager};
 
 #[derive(Serialize, Clone)]
@@ -11,6 +11,11 @@ struct Doc {
     name: String,
     content: String,
 }
+
+// A file-association open delivered before the renderer was ready to receive
+// it (macOS delivers these via RunEvent::Opened, not argv).
+#[derive(Default)]
+struct Pending(Mutex<Option<String>>);
 
 fn is_md_path(p: &str) -> bool {
     let l = p.to_lowercase();
@@ -32,8 +37,9 @@ fn read_doc_inner(path: &str) -> Result<Doc, String> {
 }
 
 #[tauri::command]
-fn get_initial_file() -> Option<Doc> {
-    let p = md_path_from_args(env::args().skip(1))?;
+fn get_initial_file(pending: tauri::State<Pending>) -> Option<Doc> {
+    let p = md_path_from_args(env::args().skip(1))
+        .or_else(|| pending.0.lock().unwrap().take())?;
     read_doc_inner(&p).ok()
 }
 
@@ -63,7 +69,27 @@ fn main() {
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .manage(Pending::default())
         .invoke_handler(tauri::generate_handler![get_initial_file, read_doc, save_file])
-        .run(tauri::generate_context!())
-        .expect("error while running MDView");
+        .build(tauri::generate_context!())
+        .expect("error while building MDView")
+        .run(|_app, _event| {
+            // macOS delivers file-association opens as Opened events. At app
+            // startup the renderer is not listening yet, so also stash the
+            // path for get_initial_file.
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Opened { urls } = &_event {
+                for url in urls {
+                    let Ok(pb) = url.to_file_path() else { continue };
+                    let p = pb.to_string_lossy().into_owned();
+                    if !is_md_path(&p) {
+                        continue;
+                    }
+                    if let Ok(doc) = read_doc_inner(&p) {
+                        let _ = _app.emit("open-path", doc);
+                    }
+                    *_app.state::<Pending>().0.lock().unwrap() = Some(p);
+                }
+            }
+        });
 }

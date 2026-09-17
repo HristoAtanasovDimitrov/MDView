@@ -6,7 +6,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const srcHtml = path.join(__dirname, "..", "app", "index.html");
+const srcHtml = path.join(__dirname, "app", "index.html");
 const outDir = path.join(__dirname, "src");
 
 let html = fs.readFileSync(srcHtml, "utf8");
@@ -20,4 +20,4 @@ html = html.slice(0, idx) + "<script>\n" + shim + "\n</script>\n" + html.slice(i
 
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, "index.html"), html);
-console.log("Synced app/index.html -> tauri-prototype/src/index.html");
+console.log("Synced app/index.html -> src/index.html");

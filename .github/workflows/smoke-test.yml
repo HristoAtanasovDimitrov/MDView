@@ -18,41 +18,54 @@ jobs:
           node-version: 22
           cache: npm
 
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev \
+            xvfb xdotool
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
       - run: npm ci
 
-      - name: Build unpacked app
-        run: npx electron-builder --dir
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Build app binary (no installers)
+        run: npx tauri build --no-bundle
 
-      - name: Launch app with a test file and probe the renderer
+      - name: Launch app with a test file and verify the window
         shell: bash
         run: |
           set -e
           printf '# Smoke Test\n\nHello from CI\n' > /tmp/test.md
 
-          APP=$(find dist -type f \( -path "*MacOS/MDView" -o -path "*linux-unpacked/mdview" -o -path "*linux-unpacked/MDView" \) 2>/dev/null | head -1)
-          echo "launching: $APP"
-          test -n "$APP"
+          APP=src-tauri/target/release/mdview
+          test -x "$APP"
 
           if [ "$RUNNER_OS" = "Linux" ]; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq xvfb
-            xvfb-run -a "$APP" --no-sandbox --remote-debugging-port=9333 /tmp/test.md &
+            xvfb-run -a "$APP" /tmp/test.md &
+            # The app mirrors the opened document into the native window
+            # title ("test.md — MDView"), so probe it with xdotool.
+            ok=""
+            for i in $(seq 1 30); do
+              sleep 1
+              if DISPLAY=:99 xdotool search --name "test.md" >/dev/null 2>&1; then ok=1; break; fi
+              # xvfb-run picks a free display; fall back to searching them all
+              for d in 99 0 1; do
+                if DISPLAY=:$d xdotool search --name "test.md" >/dev/null 2>&1; then ok=1; break 2; fi
+              done
+            done
+            test -n "$ok" || { echo "FAIL: no window titled test.md appeared"; exit 1; }
           else
-            "$APP" --remote-debugging-port=9333 /tmp/test.md &
+            "$APP" /tmp/test.md &
+            APP_PID=$!
+            # macOS CI cannot read window titles without accessibility
+            # permissions, so assert the process survives startup.
+            sleep 10
+            kill -0 "$APP_PID" || { echo "FAIL: app exited during startup"; exit 1; }
           fi
-
-          # Poll the DevTools endpoint until the renderer has loaded the document
-          # (the endpoint comes up before page JS runs, so keep polling until
-          # the page title shows the opened file)
-          ok=""
-          for i in $(seq 1 60); do
-            sleep 1
-            if curl -sf http://127.0.0.1:9333/json -o /tmp/pages.json 2>/dev/null; then
-              if grep -q "test.md" /tmp/pages.json; then ok=1; break; fi
-            fi
-          done
-          cat /tmp/pages.json || true
-          test -n "$ok" || { echo "FAIL: renderer never showed test.md"; exit 1; }
-          grep -q "MDView" /tmp/pages.json || { echo "FAIL: app title not found"; exit 1; }
-          echo "SMOKE TEST PASSED: app launched and opened test.md on $RUNNER_OS"
+          echo "SMOKE TEST PASSED on $RUNNER_OS"

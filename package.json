@@ -1,81 +1,17 @@
 {
   "name": "mdview",
   "productName": "MDView",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "MDView",
   "author": "Hristo Dimitrov",
   "license": "MIT",
-  "main": "main.js",
+  "private": true,
   "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder --win"
+    "sync": "node sync.js",
+    "start": "tauri dev",
+    "dist": "tauri build"
   },
   "devDependencies": {
-    "electron": "^33.0.0",
-    "electron-builder": "^25.1.8"
-  },
-  "build": {
-    "appId": "com.hristodimitrov.mdview",
-    "productName": "MDView",
-    "artifactName": "MDView-Setup-${version}.${ext}",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "main.js",
-      "preload.js",
-      "app/**/*"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "HristoAtanasovDimitrov",
-      "repo": "MDView",
-      "releaseType": "release"
-    },
-    "win": {
-      "target": "nsis",
-      "icon": "build/icon.ico"
-    },
-    "mac": {
-      "target": [
-        { "target": "dmg", "arch": ["x64", "arm64"] }
-      ],
-      "artifactName": "MDView-${version}-${arch}.${ext}",
-      "icon": "build/icon.icns",
-      "category": "public.app-category.productivity"
-    },
-    "linux": {
-      "target": ["AppImage", "deb"],
-      "icon": "build/icon.png",
-      "category": "Utility",
-      "maintainer": "Hristo Dimitrov",
-      "synopsis": "Dark markdown viewer and editor"
-    },
-    "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "deleteAppDataOnUninstall": true,
-      "include": "build/installer.nsh"
-    },
-    "fileAssociations": [
-      {
-        "ext": "md",
-        "name": "Markdown Document",
-        "description": "Markdown document",
-        "role": "Editor"
-      },
-      {
-        "ext": "markdown",
-        "name": "Markdown Document",
-        "description": "Markdown document",
-        "role": "Editor"
-      },
-      {
-        "ext": "mdown",
-        "name": "Markdown Document",
-        "description": "Markdown document",
-        "role": "Editor"
-      }
-    ]
+    "@tauri-apps/cli": "^2"
   }
 }

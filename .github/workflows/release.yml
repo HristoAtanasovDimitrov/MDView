@@ -13,7 +13,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            args: ""
+          - os: macos-latest
+            # One universal .dmg instead of separate x64/arm64 builds
+            args: "--target universal-apple-darwin"
+          - os: ubuntu-latest
+            args: ""
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -23,21 +30,42 @@ jobs:
           node-version: 22
           cache: npm
 
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Add macOS universal targets
+        if: matrix.os == 'macos-latest'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Install Linux build dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
       - run: npm ci
 
-      - name: Build and publish to GitHub release
-        run: npx electron-builder --publish always
+      - name: Build (and upload to a draft release on tag pushes)
+        uses: tauri-apps/tauri-action@v0
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No signing certificates: build unsigned apps
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # No signing certificates: builds are unsigned
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: "MDView __VERSION__"
+          releaseDraft: true
+          args: ${{ matrix.args }}
 
   publish:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Publish the release (electron-builder leaves it as draft)
+      - name: Publish the release (tauri-action leaves it as draft)
         run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

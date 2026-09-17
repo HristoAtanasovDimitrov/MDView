@@ -17,9 +17,13 @@ Grab the latest build from [Releases](https://github.com/HristoAtanasovDimitrov/
 
 | Platform | File | Notes |
 |----------|------|-------|
-| Windows | `MDView-Setup-<version>.exe` | Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
-| macOS | `MDView-<version>-<arch>.dmg` | `arm64` for Apple Silicon, `x64` for Intel. Unsigned: right-click the app → Open the first time |
-| Linux | `MDView-<version>.AppImage` or `.deb` | AppImage: `chmod +x` and run |
+| Windows | `MDView_<version>_x64-setup.exe` | ~1 MB. Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
+| macOS | `MDView_<version>_universal.dmg` | One build for Apple Silicon and Intel. Unsigned: right-click the app → Open the first time |
+| Linux | `MDView_<version>_amd64.AppImage` or `.deb` | AppImage: `chmod +x` and run |
+
+Since 2.0 MDView is built with [Tauri](https://tauri.app) instead of Electron, shrinking
+the installer from ~80 MB to ~1 MB by rendering in the OS webview (WebView2 on Windows,
+preinstalled on Windows 10/11 — the installer fetches it automatically if missing).
 
 There is also a zero-install flavor: open [MDView.html](MDView.html) in Edge/Chrome.
 
@@ -43,22 +47,29 @@ There is also a zero-install flavor: open [MDView.html](MDView.html) in Edge/Chr
 
 ## Development
 
+Prerequisites: Node, [Rust](https://rustup.rs) (stable), and on Windows the
+Visual Studio C++ build tools.
+
 ```bash
 npm install     # once
 npm start       # run the app in dev mode
-npm run dist    # build the Windows installer into dist/
+npm run dist    # build the installer for the current platform
 ```
 
-The installer is unsigned, so SmartScreen may prompt on first run
-(More info → Run anyway).
+Installers land in `src-tauri/target/release/bundle/`. They are unsigned, so
+SmartScreen may prompt on first run (More info → Run anyway).
 
 ## Project layout
 
-- `app/index.html` — the entire UI and markdown renderer (Electron flavor)
-- `main.js` — Electron main process: windows, dialogs, file I/O, single instance, external links
-- `preload.js` — the secure IPC bridge exposed as `window.mdview`
-- `build/gen-icon.ps1` — regenerates `build/icon.ico`
-- `build/installer.nsh` — NSIS additions (friendly app name registration)
+- `app/index.html` — the entire UI and markdown renderer, unchanged from 1.x
+- `sync.js` — copies `app/index.html` to `src/index.html`, inlining `src/shim.js`
+  (runs automatically before every dev run and build)
+- `src/shim.js` — the `window.mdview` IPC bridge, implemented on Tauri
+  (dialogs, drag & drop, external links, window-title sync)
+- `src-tauri/src/main.rs` — the native side: file I/O, CLI/file-association
+  opens, single instance
+- `src-tauri/tauri.conf.json` — window, bundle, and file-association config
+- `build/gen-icon.ps1` — regenerates the icons in `build/`
 - `MDView.html` — the original standalone browser version
 
 ## License
