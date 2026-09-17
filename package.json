@@ -9,7 +9,8 @@
   "scripts": {
     "sync": "node sync.js",
     "start": "tauri dev",
-    "dist": "tauri build"
+    "dist": "tauri build",
+    "tauri": "tauri"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
