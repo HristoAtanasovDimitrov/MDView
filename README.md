@@ -23,7 +23,7 @@ Grab [2.0.0](https://github.com/HristoAtanasovDimitrov/MDView/releases/tag/v2.0.
 
 Since 2.0 MDView is built with [Tauri](https://tauri.app) instead of Electron, shrinking
 the installer from ~80 MB to ~1 MB by rendering in the OS webview (WebView2 on Windows,
-preinstalled on Windows 10/11 — the installer fetches it automatically if missing).
+preinstalled on Windows 10/11 - the installer fetches it automatically if missing).
 
 There is also a zero-install flavor: open [MDView.html](MDView.html) in Edge/Chrome.
 
@@ -33,7 +33,7 @@ There is also a zero-install flavor: open [MDView.html](MDView.html) in Edge/Chr
 - Tabs: open several files at once (`Ctrl+T` / `Ctrl+W` / `Ctrl+Tab`),
   restored automatically on the next launch
 - Recent-files menu with the last dozen opened documents
-- Clickable task-list checkboxes in the reading view — toggling one edits the source
+- Clickable task-list checkboxes in the reading view - toggling one edits the source
 - Edit mode (`Ctrl+E`) with split live preview
 - Open (`Ctrl+O`, multi-select), Save (`Ctrl+S`), drag & drop
 - Find (`Ctrl+F`) with match highlighting and Enter / Shift+Enter / F3 stepping
@@ -61,16 +61,16 @@ SmartScreen may prompt on first run (More info → Run anyway).
 
 ## Project layout
 
-- `app/index.html` — the entire UI and markdown renderer, unchanged from 1.x
-- `sync.js` — copies `app/index.html` to `src/index.html`, inlining `src/shim.js`
+- `app/index.html` - the entire UI and markdown renderer, unchanged from 1.x
+- `sync.js` - copies `app/index.html` to `src/index.html`, inlining `src/shim.js`
   (runs automatically before every dev run and build)
-- `src/shim.js` — the `window.mdview` IPC bridge, implemented on Tauri
+- `src/shim.js` - the `window.mdview` IPC bridge, implemented on Tauri
   (dialogs, drag & drop, external links, window-title sync)
-- `src-tauri/src/main.rs` — the native side: file I/O, CLI/file-association
+- `src-tauri/src/main.rs` - the native side: file I/O, CLI/file-association
   opens, single instance
-- `src-tauri/tauri.conf.json` — window, bundle, and file-association config
-- `build/gen-icon.ps1` — regenerates the icons in `build/`
-- `MDView.html` — the original standalone browser version
+- `src-tauri/tauri.conf.json` - window, bundle, and file-association config
+- `build/gen-icon.ps1` - regenerates the icons in `build/`
+- `MDView.html` - the original standalone browser version
 
 ## License
 
