@@ -47,19 +47,26 @@ jobs:
           test -x "$APP"
 
           if [ "$RUNNER_OS" = "Linux" ]; then
-            xvfb-run -a "$APP" /tmp/test.md &
+            Xvfb :99 -screen 0 1280x800x24 &
+            export DISPLAY=:99
+            # WebKitGTK's compositing/DMA-BUF renderers fail on headless CI
+            # (libEGL/DRI3 errors) and the window never renders.
+            export WEBKIT_DISABLE_COMPOSITING_MODE=1
+            export WEBKIT_DISABLE_DMABUF_RENDERER=1
+            sleep 2
+            "$APP" /tmp/test.md &
             # The app mirrors the opened document into the native window
             # title ("test.md — MDView"), so probe it with xdotool.
             ok=""
-            for i in $(seq 1 30); do
+            for i in $(seq 1 60); do
               sleep 1
-              if DISPLAY=:99 xdotool search --name "test.md" >/dev/null 2>&1; then ok=1; break; fi
-              # xvfb-run picks a free display; fall back to searching them all
-              for d in 99 0 1; do
-                if DISPLAY=:$d xdotool search --name "test.md" >/dev/null 2>&1; then ok=1; break 2; fi
-              done
+              if xdotool search --name "test.md" >/dev/null 2>&1; then ok=1; break; fi
             done
-            test -n "$ok" || { echo "FAIL: no window titled test.md appeared"; exit 1; }
+            if [ -z "$ok" ]; then
+              echo "FAIL: no window titled test.md appeared; windows present:"
+              xdotool search --name ".*" getwindowname %@ 2>/dev/null || true
+              exit 1
+            fi
           else
             "$APP" /tmp/test.md &
             APP_PID=$!
