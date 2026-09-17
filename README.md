@@ -26,8 +26,12 @@ There is also a zero-install flavor: open [MDView.html](MDView.html) in Edge/Chr
 ## Features
 
 - Reading view with book-style serif typography
+- Tabs: open several files at once (`Ctrl+T` / `Ctrl+W` / `Ctrl+Tab`),
+  restored automatically on the next launch
+- Recent-files menu with the last dozen opened documents
+- Clickable task-list checkboxes in the reading view — toggling one edits the source
 - Edit mode (`Ctrl+E`) with split live preview
-- Open (`Ctrl+O`), Save (`Ctrl+S`), drag & drop
+- Open (`Ctrl+O`, multi-select), Save (`Ctrl+S`), drag & drop
 - Find (`Ctrl+F`) with match highlighting and Enter / Shift+Enter / F3 stepping
 - Search & replace (`Ctrl+H`) with a regular-expression toggle and `$1` capture groups
 - Adjustable reading width with a persistent "set default"

@@ -101,6 +101,138 @@
     margin-left: 6px;
   }
 
+  /* ---------- Tab strip ---------- */
+  .tabstrip-row {
+    display: flex;
+    align-items: stretch;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+    min-height: 32px;
+  }
+  .tabstrip {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabstrip::-webkit-scrollbar { display: none; }
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 6px 0 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    cursor: pointer;
+    user-select: none;
+    max-width: 220px;
+    flex-shrink: 0;
+  }
+  .tab.active {
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: inset 0 2px 0 var(--accent);
+  }
+  .tab:hover:not(.active) { background: var(--surface-2); }
+  .tab-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tab.dirty .tab-name::after { content: " \25CF"; color: var(--accent); }
+  .tab-close {
+    border: none;
+    background: none;
+    padding: 2px 5px;
+    font-size: 10px;
+    color: var(--muted);
+    border-radius: 3px;
+    line-height: 1;
+  }
+  .tab-close:hover:not(:disabled) {
+    color: var(--danger);
+    background: var(--surface-2);
+    border: none;
+  }
+  #btn-newtab {
+    border: none;
+    border-radius: 0;
+    background: var(--surface);
+    color: var(--muted);
+    padding: 0 14px;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  #btn-newtab:hover:not(:disabled) { border: none; }
+
+  /* ---------- Recent files menu ---------- */
+  .recent-menu {
+    position: fixed;
+    top: 46px;
+    right: 20px;
+    display: none;
+    min-width: 280px;
+    max-width: 440px;
+    padding: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+    z-index: 6;
+  }
+  .recent-menu.open { display: block; }
+  .recent-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+  }
+  .recent-item:hover:not(:disabled) { background: var(--surface); border: none; color: inherit; }
+  .recent-item .r-name {
+    display: block;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+  }
+  .recent-item .r-path {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    direction: rtl;
+    text-align: left;
+  }
+  .recent-item:hover .r-name { color: var(--accent); }
+  .recent-sep {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 6px 0;
+  }
+  .recent-clear, .recent-empty {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .recent-clear:hover:not(:disabled) { background: var(--surface); border: none; color: var(--danger); }
+
   /* ---------- Save-state rule (signature) ---------- */
   .save-rule {
     height: 2px;
@@ -176,7 +308,7 @@
   #content li { margin: 0.25em 0; }
   #content li > ul, #content li > ol { margin-bottom: 0; }
   #content li.task { list-style: none; margin-left: -1.3em; }
-  #content li.task input { margin-right: 0.5em; accent-color: var(--accent); }
+  #content li.task input { margin-right: 0.5em; accent-color: var(--accent); cursor: pointer; }
 
   #content a { color: var(--accent); text-decoration-color: var(--accent-dim); }
   #content a:hover { text-decoration-color: var(--accent); }
@@ -246,7 +378,7 @@
   /* ---------- Find bar ---------- */
   .findbar {
     position: fixed;
-    top: 54px;
+    top: 84px;
     right: 20px;
     display: none;
     align-items: center;
@@ -361,11 +493,17 @@
   <div class="toolbar-buttons">
     <button id="btn-new">New</button>
     <button id="btn-open">Open<kbd>Ctrl+O</kbd></button>
+    <button id="btn-recent">Recent &#9662;</button>
     <button id="btn-mode">Edit<kbd>Ctrl+E</kbd></button>
     <button id="btn-save" class="primary" disabled>Save<kbd>Ctrl+S</kbd></button>
   </div>
 </header>
+<div class="tabstrip-row">
+  <div class="tabstrip" id="tabstrip" role="tablist"></div>
+  <button id="btn-newtab" title="New tab (Ctrl+T)">+</button>
+</div>
 <div class="save-rule" id="save-rule"></div>
+<div class="recent-menu" id="recent-menu"></div>
 
 <div class="findbar" id="findbar" role="search">
   <div class="find-row">
@@ -407,7 +545,7 @@
 </footer>
 
 <div id="drop-overlay">Drop a markdown file to open it</div>
-<input type="file" id="file-input" accept=".md,.markdown,.txt,.mdown" hidden>
+<input type="file" id="file-input" accept=".md,.markdown,.txt,.mdown" multiple hidden>
 
 <script>
 "use strict";
@@ -454,7 +592,7 @@ function renderInline(text) {
   return text;
 }
 
-function renderMarkdown(src) {
+function renderMarkdown(src, baseLine = 0) {
   const lines = src.replace(/\r\n?/g, "\n").split("\n");
   const out = [];
   let i = 0;
@@ -504,13 +642,14 @@ function renderMarkdown(src) {
 
     // Blockquote
     if (/^\s{0,3}>/.test(line)) {
+      const bqStart = i; // buf maps 1:1 to source lines from here
       const buf = [];
       while (i < lines.length && (/^\s{0,3}>/.test(lines[i]) || (!isBlank(lines[i]) && buf.length))) {
         if (/^\s{0,3}>/.test(lines[i])) buf.push(lines[i].replace(/^\s{0,3}>\s?/, ""));
         else buf.push(lines[i]);
         i++;
       }
-      out.push("<blockquote>" + renderMarkdown(buf.join("\n")) + "</blockquote>");
+      out.push("<blockquote>" + renderMarkdown(buf.join("\n"), baseLine + bqStart) + "</blockquote>");
       continue;
     }
 
@@ -549,7 +688,7 @@ function renderMarkdown(src) {
       while (i < lines.length) {
         const m = lines[i].match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
         if (m) {
-          items.push({ indent: m[1].length, ordered: /\d/.test(m[2]), text: [m[3]] });
+          items.push({ indent: m[1].length, ordered: /\d/.test(m[2]), text: [m[3]], line: baseLine + i });
           i++;
         } else if (!isBlank(lines[i]) && items.length && /^\s+/.test(lines[i])) {
           items[items.length - 1].text.push(lines[i].trim());
@@ -576,8 +715,8 @@ function renderMarkdown(src) {
           let text = items[k].text.join(" ");
           const task = text.match(/^\[([ xX])\]\s+(.*)$/);
           if (task) {
-            html += `<li class="task"><input type="checkbox" disabled${task[1] !== " " ? " checked" : ""}>` +
-                    renderInline(task[2]) + "</li>";
+            html += `<li class="task"><input type="checkbox" data-line="${items[k].line}"` +
+                    `${task[1] !== " " ? " checked" : ""}>` + renderInline(task[2]) + "</li>";
           } else {
             html += "<li>" + renderInline(text) + "</li>";
           }
@@ -632,12 +771,16 @@ const fileInput = $("file-input");
 const supportsFS = "showOpenFilePicker" in window;
 const isElectron = typeof window.mdview !== "undefined";
 
-let fileHandle = null;   // browser: FileSystemFileHandle
-let currentPath = null;  // electron: absolute file path
-let currentName = "Welcome.md";
-let dirty = false;
+const tabstrip = $("tabstrip");
+const viewPane = $("view-pane");
+
+let tabs = [];        // { id, path, name, handle, text, dirty, scrollView, scrollEdit }
+let activeId = null;
+let nextTabId = 1;
 let editing = false;
 let renderTimer = null;
+
+const activeTab = () => tabs.find((t) => t.id === activeId) || null;
 
 const WELCOME = `# Welcome to MDView
 
@@ -650,9 +793,10 @@ A fast, dark, dependency-free markdown viewer and editor. Press **Edit** (or \`C
 - Nested lists
   - like this one
   - and this one
-- Task lists:
+- Task lists you can toggle right here in the view:
   - [x] Build the app
   - [ ] Open your first file
+  - [ ] Click a checkbox — it edits the markdown source
 
 1. Ordered lists work too
 2. With proper numbering
@@ -671,11 +815,16 @@ function greet(name) {
 
 | Feature | Shortcut | Notes |
 |---------|:--------:|-------|
-| Open file | Ctrl+O | Native file picker |
+| Open file | Ctrl+O | Native file picker, multi-select |
+| New tab | Ctrl+T | Open files side by side in tabs |
+| Close tab | Ctrl+W | Middle-click a tab works too |
+| Next / previous tab | Ctrl+Tab | Also Ctrl+PageDown / Ctrl+PageUp |
 | Toggle edit | Ctrl+E | Split live preview |
 | Save | Ctrl+S | Writes back to disk |
 | Find | Ctrl+F | Enter / Shift+Enter to step through matches |
 | Replace | Ctrl+H | Edit mode; \`.*\` toggles regex with \`$1\` groups |
+
+Open files are remembered between sessions, and the **Recent** menu keeps the last dozen files one click away.
 
 ---
 
@@ -704,30 +853,260 @@ function updateStats() {
     ? "<1 min read" : mins + " min read";
 }
 
+function updateChrome() {
+  const t = activeTab();
+  if (!t) return;
+  filenameEl.textContent = t.name;
+  filenameEl.title = t.path || t.name;
+  filenameEl.classList.toggle("dirty", t.dirty);
+  saveRule.classList.toggle("dirty", t.dirty);
+  saveState.textContent = t.dirty ? "unsaved changes" : "saved";
+  saveState.classList.toggle("dirty", t.dirty);
+  btnSave.disabled = !t.dirty;
+  document.title = (t.dirty ? "● " : "") + t.name + " — MDView";
+}
+
 function setDirty(v) {
-  dirty = v;
-  filenameEl.classList.toggle("dirty", v);
-  saveRule.classList.toggle("dirty", v);
-  saveState.textContent = v ? "unsaved changes" : "saved";
-  saveState.classList.toggle("dirty", v);
-  btnSave.disabled = !v;
-  document.title = (v ? "● " : "") + currentName + " — MDView";
+  const t = activeTab();
+  if (!t) return;
+  if (t.dirty !== v) {
+    t.dirty = v;
+    renderTabs();
+  }
+  updateChrome();
 }
 
-function setFile(name, handle, path) {
-  currentName = name;
-  fileHandle = handle || null;
-  currentPath = path || null;
-  filenameEl.textContent = name;
-  filenameEl.title = path || name;
-  setDirty(false);
+/* ================= Tabs ================= */
+
+function makeTab(text, name, handle, path) {
+  return {
+    id: nextTabId++,
+    path: path || null,
+    name,
+    handle: handle || null,
+    text,
+    dirty: false,
+    scrollView: 0,
+    scrollEdit: 0,
+  };
 }
 
-function loadDocument(text, name, handle, path) {
-  editor.value = text;
-  setFile(name, handle, path);
+function renderTabs() {
+  tabstrip.textContent = "";
+  for (const t of tabs) {
+    const el = document.createElement("div");
+    el.className = "tab" + (t.id === activeId ? " active" : "") + (t.dirty ? " dirty" : "");
+    el.title = t.path || t.name;
+    el.setAttribute("role", "tab");
+    el.setAttribute("aria-selected", String(t.id === activeId));
+
+    const label = document.createElement("span");
+    label.className = "tab-name";
+    label.textContent = t.name;
+    el.appendChild(label);
+
+    const close = document.createElement("button");
+    close.className = "tab-close";
+    close.textContent = "✕";
+    close.title = "Close tab (Ctrl+W)";
+    close.addEventListener("click", (e) => { e.stopPropagation(); closeTab(t.id); });
+    el.appendChild(close);
+
+    el.addEventListener("click", () => selectTab(t.id));
+    el.addEventListener("auxclick", (e) => {
+      if (e.button === 1) { e.preventDefault(); closeTab(t.id); }
+    });
+    tabstrip.appendChild(el);
+  }
+  const act = tabstrip.querySelector(".tab.active");
+  if (act) act.scrollIntoView({ inline: "nearest", block: "nearest" });
+}
+
+function selectTab(id, force) {
+  if (id === activeId && !force) return;
+  const cur = activeTab();
+  if (cur) {
+    cur.text = editor.value;
+    cur.scrollEdit = editor.scrollTop;
+    cur.scrollView = viewPane.scrollTop;
+  }
+  activeId = id;
+  const t = activeTab();
+  if (!t) return;
+  editor.value = t.text;
   render();
-  if (!editing) content.parentElement.scrollTop = 0;
+  editor.scrollTop = t.scrollEdit;
+  viewPane.scrollTop = t.scrollView;
+  updateChrome();
+  renderTabs();
+  saveSession();
+  if (findOpen) runFind(false);
+}
+
+function cycleTab(dir) {
+  if (tabs.length < 2) return;
+  const idx = tabs.findIndex((t) => t.id === activeId);
+  selectTab(tabs[(idx + dir + tabs.length) % tabs.length].id);
+}
+
+async function closeTab(id) {
+  const t = tabs.find((x) => x.id === id);
+  if (!t) return;
+  if (t.dirty) {
+    if (t.id !== activeId) selectTab(t.id); // show what would be discarded
+    if (!(await confirmDiscard())) return;
+  }
+  const idx = tabs.indexOf(t);
+  tabs.splice(idx, 1);
+  if (!tabs.length) {
+    const w = makeTab(WELCOME, "Welcome.md", null, null);
+    tabs.push(w);
+    activeId = null;
+    selectTab(w.id, true);
+  } else if (id === activeId) {
+    activeId = null;
+    selectTab(tabs[Math.min(idx, tabs.length - 1)].id, true);
+  } else {
+    renderTabs();
+    saveSession();
+  }
+}
+
+// Open a document in a tab. Focuses the existing tab when the path is already
+// open (refreshing clean tabs from the newly read content).
+function openDoc(doc, handle, opts = {}) {
+  if (doc.path) {
+    const existing = tabs.find((t) => t.path === doc.path);
+    if (existing) {
+      if (!existing.dirty) existing.text = doc.content;
+      selectTab(existing.id, true);
+      if (!opts.noRecent) addRecent(doc.path, doc.name);
+      return existing;
+    }
+  }
+  const t = makeTab(doc.content, doc.name, handle, doc.path);
+  tabs.push(t);
+  // Opening a real file while the only tab is the untouched Welcome doc replaces it.
+  if (doc.path && tabs.length === 2 && !tabs[0].path && !tabs[0].dirty && tabs[0].name === "Welcome.md") {
+    tabs.shift();
+  }
+  selectTab(t.id, true);
+  if (doc.path && !opts.noRecent) addRecent(doc.path, doc.name);
+  return t;
+}
+
+/* ================= Session persistence ================= */
+
+const SESSION_KEY = "mdview.session";
+
+function saveSession() {
+  if (!isElectron) return;
+  const files = tabs.filter((t) => t.path).map((t) => t.path);
+  const act = activeTab();
+  const data = { files, active: act && act.path ? files.indexOf(act.path) : -1 };
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {}
+}
+
+function loadSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION_KEY));
+    if (s && Array.isArray(s.files)) return s;
+  } catch {}
+  return null;
+}
+
+/* ================= Recent files ================= */
+
+const RECENT_KEY = "mdview.recent";
+const RECENT_MAX = 12;
+const btnRecent = $("btn-recent");
+const recentMenu = $("recent-menu");
+
+function getRecent() {
+  try {
+    const v = JSON.parse(localStorage.getItem(RECENT_KEY));
+    if (Array.isArray(v)) return v.filter((r) => r && typeof r.path === "string");
+  } catch {}
+  return [];
+}
+
+function setRecent(list) {
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))); } catch {}
+}
+
+function addRecent(path, name) {
+  if (!isElectron || !path) return;
+  const list = getRecent().filter((r) => r.path !== path);
+  list.unshift({ path, name });
+  setRecent(list);
+}
+
+function removeRecent(path) {
+  setRecent(getRecent().filter((r) => r.path !== path));
+}
+
+function closeRecentMenu() {
+  recentMenu.classList.remove("open");
+}
+
+function buildRecentMenu() {
+  recentMenu.textContent = "";
+  const list = getRecent();
+  if (!list.length) {
+    const empty = document.createElement("div");
+    empty.className = "recent-empty";
+    empty.textContent = "No recent files";
+    recentMenu.appendChild(empty);
+    return;
+  }
+  for (const r of list) {
+    const item = document.createElement("button");
+    item.className = "recent-item";
+    const name = document.createElement("span");
+    name.className = "r-name";
+    name.textContent = r.name || r.path;
+    const path = document.createElement("span");
+    path.className = "r-path";
+    path.textContent = r.path;
+    item.append(name, path);
+    item.title = r.path;
+    item.addEventListener("click", () => { closeRecentMenu(); openRecent(r.path); });
+    recentMenu.appendChild(item);
+  }
+  const sep = document.createElement("hr");
+  sep.className = "recent-sep";
+  recentMenu.appendChild(sep);
+  const clear = document.createElement("button");
+  clear.className = "recent-clear";
+  clear.textContent = "Clear recent files";
+  clear.addEventListener("click", () => { setRecent([]); closeRecentMenu(); });
+  recentMenu.appendChild(clear);
+}
+
+async function openRecent(path) {
+  try {
+    openDoc(await window.mdview.readFile(path));
+  } catch {
+    alert("Could not open the file (moved or deleted?):\n" + path);
+    removeRecent(path);
+  }
+}
+
+if (isElectron) {
+  btnRecent.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (recentMenu.classList.contains("open")) { closeRecentMenu(); return; }
+    buildRecentMenu();
+    recentMenu.classList.add("open");
+  });
+  window.addEventListener("click", (e) => {
+    if (!recentMenu.contains(e.target)) closeRecentMenu();
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeRecentMenu();
+  });
+} else {
+  btnRecent.style.display = "none";
 }
 
 /* ================= Edit mode ================= */
@@ -751,21 +1130,23 @@ const PICKER_TYPES = [{
 }];
 
 async function confirmDiscard() {
-  if (!dirty) return true;
+  const t = activeTab();
+  if (!t || !t.dirty) return true;
   if (isElectron) return window.mdview.confirmDiscard();
   return confirm("You have unsaved changes. Discard them?");
 }
 
 async function openFile() {
-  if (!(await confirmDiscard())) return;
   if (isElectron) {
-    const doc = await window.mdview.openDialog();
-    if (doc) loadDocument(doc.content, doc.name, null, doc.path);
+    const docs = await window.mdview.openDialog();
+    if (docs) docs.forEach((d) => openDoc(d));
   } else if (supportsFS) {
     try {
-      const [handle] = await window.showOpenFilePicker({ types: PICKER_TYPES });
-      const file = await handle.getFile();
-      loadDocument(await file.text(), file.name, handle);
+      const handles = await window.showOpenFilePicker({ types: PICKER_TYPES, multiple: true });
+      for (const handle of handles) {
+        const file = await handle.getFile();
+        openDoc({ content: await file.text(), name: file.name }, handle);
+      }
     } catch (e) { /* user cancelled */ }
   } else {
     fileInput.click();
@@ -773,54 +1154,65 @@ async function openFile() {
 }
 
 async function saveFile() {
+  const t = activeTab();
+  if (!t) return;
+  t.text = editor.value;
   if (isElectron) {
     try {
-      if (currentPath) {
-        await window.mdview.saveFile(currentPath, editor.value);
+      if (t.path) {
+        await window.mdview.saveFile(t.path, t.text);
         setDirty(false);
       } else {
-        const suggested = currentName.endsWith(".md") ? currentName : currentName + ".md";
-        const res = await window.mdview.saveAs(editor.value, suggested);
-        if (res) setFile(res.name, null, res.path);
+        const suggested = t.name.endsWith(".md") ? t.name : t.name + ".md";
+        const res = await window.mdview.saveAs(t.text, suggested);
+        if (res) {
+          t.path = res.path;
+          t.name = res.name;
+          setDirty(false);
+          renderTabs();
+          addRecent(res.path, res.name);
+          saveSession();
+        }
       }
     } catch (e) {
       alert("Could not save the file:\n" + (e.message || e));
     }
   } else if (supportsFS) {
     try {
-      if (!fileHandle) {
-        fileHandle = await window.showSaveFilePicker({
-          suggestedName: currentName.endsWith(".md") ? currentName : currentName + ".md",
+      if (!t.handle) {
+        t.handle = await window.showSaveFilePicker({
+          suggestedName: t.name.endsWith(".md") ? t.name : t.name + ".md",
           types: PICKER_TYPES,
         });
-        setFile(fileHandle.name, fileHandle);
+        t.name = t.handle.name;
+        renderTabs();
       }
-      const writable = await fileHandle.createWritable();
-      await writable.write(editor.value);
+      const writable = await t.handle.createWritable();
+      await writable.write(t.text);
       await writable.close();
       setDirty(false);
     } catch (e) { /* user cancelled */ }
   } else {
     // Fallback: download the file
-    const blob = new Blob([editor.value], { type: "text/markdown" });
+    const blob = new Blob([t.text], { type: "text/markdown" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = currentName;
+    a.download = t.name;
     a.click();
     URL.revokeObjectURL(a.href);
     setDirty(false);
   }
 }
 
-async function newFile() {
-  if (!(await confirmDiscard())) return;
-  loadDocument("", "Untitled.md", null);
+function newFile() {
+  openDoc({ content: "", name: "Untitled.md" });
   setEditing(true);
 }
 
 fileInput.addEventListener("change", async () => {
-  const file = fileInput.files[0];
-  if (file) loadDocument(await file.text(), file.name, null);
+  for (const file of fileInput.files) {
+    openDoc({ content: await file.text(), name: file.name });
+  }
   fileInput.value = "";
 });
 
@@ -844,26 +1236,29 @@ window.addEventListener("drop", async (e) => {
   e.preventDefault();
   dragDepth = 0;
   document.body.classList.remove("dragging");
-  const item = e.dataTransfer?.items?.[0];
-  if (!item || item.kind !== "file") return;
-  if (!(await confirmDiscard())) return;
-  const file = item.getAsFile();
-  if (!file) return;
-  if (isElectron) {
-    const p = window.mdview.pathForFile(file);
-    loadDocument(await file.text(), file.name, null, p);
-    return;
+  const items = Array.from(e.dataTransfer?.items || []).filter((it) => it.kind === "file");
+  // getAsFile/getAsFileSystemHandle must be collected before any await:
+  // the DataTransferItemList is cleared once the event handler yields.
+  const picked = items.map((it) => ({
+    file: it.getAsFile(),
+    handlePromise: !isElectron && supportsFS && it.getAsFileSystemHandle
+      ? it.getAsFileSystemHandle().catch(() => null) : null,
+  }));
+  for (const p of picked) {
+    if (!p.file) continue;
+    if (isElectron) {
+      openDoc({ content: await p.file.text(), name: p.file.name, path: window.mdview.pathForFile(p.file) });
+    } else {
+      openDoc({ content: await p.file.text(), name: p.file.name }, p.handlePromise ? await p.handlePromise : null);
+    }
   }
-  let handle = null;
-  if (supportsFS && item.getAsFileSystemHandle) {
-    try { handle = await item.getAsFileSystemHandle(); } catch (_) {}
-  }
-  loadDocument(await file.text(), file.name, handle);
 });
 
 /* ================= Events ================= */
 
 editor.addEventListener("input", () => {
+  const t = activeTab();
+  if (t) t.text = editor.value;
   setDirty(true);
   scheduleRender();
   if (findOpen) {
@@ -886,7 +1281,29 @@ editor.addEventListener("keydown", (e) => {
 $("btn-open").addEventListener("click", openFile);
 $("btn-save").addEventListener("click", saveFile);
 $("btn-new").addEventListener("click", newFile);
+$("btn-newtab").addEventListener("click", newFile);
 btnMode.addEventListener("click", () => setEditing(!editing));
+
+/* ================= Task checkbox toggling ================= */
+
+// Task checkboxes carry the absolute source line they came from; clicking one
+// flips [ ] / [x] on that line without re-rendering the document.
+content.addEventListener("click", (e) => {
+  const box = e.target;
+  if (!(box instanceof HTMLInputElement) || box.type !== "checkbox") return;
+  const line = parseInt(box.dataset.line, 10);
+  const t = activeTab();
+  if (!t || Number.isNaN(line)) return;
+  const lines = editor.value.split("\n");
+  const m = (lines[line] || "").match(/^(\s*(?:>\s*)*(?:[-*+]|\d+[.)])\s+\[)( |x|X)\]/);
+  if (!m) { render(); return; } // stale mapping: resync the view instead
+  let off = m[1].length;
+  for (let k = 0; k < line; k++) off += lines[k].length + 1;
+  editor.setRangeText(m[2] === " " ? "x" : " ", off, off + 1, "preserve");
+  t.text = editor.value;
+  setDirty(true);
+  updateStats();
+});
 
 /* ================= Find in document ================= */
 
@@ -1131,16 +1548,26 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && findOpen) { closeFind(); return; }
   if (!(e.ctrlKey || e.metaKey)) return;
   const key = e.key.toLowerCase();
-  if (key === "s") { e.preventDefault(); if (dirty || (!fileHandle && !currentPath)) saveFile(); }
+  if (key === "s") {
+    e.preventDefault();
+    const t = activeTab();
+    if (t && (t.dirty || (!t.handle && !t.path))) saveFile();
+  }
   else if (key === "o") { e.preventDefault(); openFile(); }
   else if (key === "e") { e.preventDefault(); setEditing(!editing); }
   else if (key === "f") { e.preventDefault(); openFind(); }
   else if (key === "h") { e.preventDefault(); openFind(true); }
+  else if (key === "t") { e.preventDefault(); newFile(); }
+  else if (key === "w") { e.preventDefault(); if (activeId !== null) closeTab(activeId); }
+  else if (key === "tab") { e.preventDefault(); cycleTab(e.shiftKey ? -1 : 1); }
+  else if (key === "pagedown") { e.preventDefault(); cycleTab(1); }
+  else if (key === "pageup") { e.preventDefault(); cycleTab(-1); }
 });
 
 let closing = false;
 window.addEventListener("beforeunload", (e) => {
-  if (!dirty || closing) return;
+  const anyDirty = tabs.some((t) => t.dirty);
+  if (!anyDirty || closing) return;
   if (isElectron) {
     // Electron blocks the close silently; show the native dialog, then re-close.
     e.preventDefault();
@@ -1192,17 +1619,24 @@ applyWidth(storedWidth());
 
 async function init() {
   if (isElectron) {
-    window.mdview.onOpenPath(async (doc) => {
-      if (!(await confirmDiscard())) return;
-      loadDocument(doc.content, doc.name, null, doc.path);
-    });
-    const initial = await window.mdview.getInitialFile();
-    if (initial) {
-      loadDocument(initial.content, initial.name, null, initial.path);
-      return;
+    window.mdview.onOpenPath((doc) => openDoc(doc));
+
+    // Restore the previous session's tabs (silently dropping missing files),
+    // then open the file the app was launched with, if any.
+    const session = loadSession();
+    if (session) {
+      for (const p of session.files) {
+        try { openDoc(await window.mdview.readFile(p), null, { noRecent: true }); } catch {}
+      }
+      const activePath = session.files[session.active];
+      const act = activePath && tabs.find((t) => t.path === activePath);
+      if (act) selectTab(act.id, true);
     }
+    const initial = await window.mdview.getInitialFile();
+    if (initial) openDoc(initial);
+    if (tabs.length) return;
   }
-  loadDocument(WELCOME, "Welcome.md", null);
+  openDoc({ content: WELCOME, name: "Welcome.md" });
 }
 
 init();

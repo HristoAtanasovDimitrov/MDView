@@ -1,6 +1,6 @@
 "use strict";
 
-const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require("electron");
 const path = require("path");
 const fs = require("fs/promises");
 
@@ -58,7 +58,24 @@ if (!gotLock) {
   });
 }
 
+function setupMenu() {
+  // The default menu binds Ctrl/Cmd+W to "close window", which would shadow
+  // the renderer's close-tab shortcut. Drop the menu on Windows/Linux; keep a
+  // minimal roles-only menu on macOS so clipboard shortcuts keep working.
+  if (process.platform === "darwin") {
+    Menu.setApplicationMenu(Menu.buildFromTemplate([
+      { role: "appMenu" },
+      { role: "editMenu" },
+      { role: "viewMenu" },
+      { label: "Window", submenu: [{ role: "minimize" }, { role: "zoom" }, { role: "front" }] },
+    ]));
+  } else {
+    Menu.setApplicationMenu(null);
+  }
+}
+
 function createWindow() {
+  setupMenu();
   win = new BrowserWindow({
     width: 1150,
     height: 820,
@@ -115,10 +132,14 @@ ipcMain.handle("get-initial-file", async () => {
 ipcMain.handle("open-dialog", async () => {
   const res = await dialog.showOpenDialog(win, {
     filters: FILTERS,
-    properties: ["openFile"],
+    properties: ["openFile", "multiSelections"],
   });
   if (res.canceled || !res.filePaths.length) return null;
-  return readDoc(res.filePaths[0]);
+  const docs = [];
+  for (const p of res.filePaths) {
+    try { docs.push(await readDoc(p)); } catch {}
+  }
+  return docs.length ? docs : null;
 });
 
 ipcMain.handle("read-file", (_e, filePath) => readDoc(filePath));
