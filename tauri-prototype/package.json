@@ -1,0 +1,13 @@
+{
+  "name": "mdview-tauri-prototype",
+  "private": true,
+  "version": "1.5.0",
+  "scripts": {
+    "sync": "node sync.js",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
