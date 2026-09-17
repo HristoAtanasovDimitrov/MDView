@@ -1,0 +1,42 @@
+name: README version bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to write into the README download links (e.g. 2.0.0 or v2.0.0)"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Rewrite README download links
+        run: |
+          VER="${{ inputs.version }}"
+          VER="${VER#v}"
+          sed -E -i "s/(MDView_)[0-9]+\.[0-9]+\.[0-9]+/\1${VER}/g" README.md
+          sed -E -i "s#(releases/(tag|download)/v)[0-9]+\.[0-9]+\.[0-9]+#\1${VER}#g" README.md
+          sed -E -i "s/\[[0-9]+\.[0-9]+\.[0-9]+\]\(https/[${VER}](https/g" README.md
+          if git diff --quiet; then
+            echo "README already at ${VER}, nothing to bump"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "README: bump download links to ${VER}"
+            git push origin main
+          fi
