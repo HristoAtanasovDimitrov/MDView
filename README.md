@@ -13,13 +13,13 @@ A fast, simple Markdown viewer and editor.
 
 ## Download
 
-Grab the latest build from [Releases](https://github.com/HristoAtanasovDimitrov/MDView/releases):
+Grab [2.0.0](https://github.com/HristoAtanasovDimitrov/MDView/releases/tag/v2.0.0) (or the latest from [Releases](https://github.com/HristoAtanasovDimitrov/MDView/releases)):
 
 | Platform | File | Notes |
 |----------|------|-------|
-| Windows | `MDView_<version>_x64-setup.exe` | ~1 MB. Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
-| macOS | `MDView_<version>_universal.dmg` | One build for Apple Silicon and Intel. Unsigned: right-click the app → Open the first time |
-| Linux | `MDView_<version>_amd64.AppImage` or `.deb` | AppImage: `chmod +x` and run |
+| Windows | [`MDView_2.0.0_x64-setup.exe`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.0.0/MDView_2.0.0_x64-setup.exe) | ~1 MB. Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
+| macOS | [`MDView_2.0.0_universal.dmg`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.0.0/MDView_2.0.0_universal.dmg) | One build for Apple Silicon and Intel. Unsigned: right-click the app → Open the first time |
+| Linux | [`MDView_2.0.0_amd64.deb`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.0.0/MDView_2.0.0_amd64.deb) or [`.AppImage`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.0.0/MDView_2.0.0_amd64.AppImage) | Prefer the .deb (~2 MB, uses the system WebKitGTK); the AppImage bundles its own and is large. AppImage: `chmod +x` and run |
 
 Since 2.0 MDView is built with [Tauri](https://tauri.app) instead of Electron, shrinking
 the installer from ~80 MB to ~1 MB by rendering in the OS webview (WebView2 on Windows,
