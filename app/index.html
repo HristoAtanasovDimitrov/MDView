@@ -863,7 +863,7 @@ function updateChrome() {
   saveState.textContent = t.dirty ? "unsaved changes" : "saved";
   saveState.classList.toggle("dirty", t.dirty);
   btnSave.disabled = !t.dirty;
-  document.title = (t.dirty ? "● " : "") + t.name + " — MDView";
+  document.title = (t.dirty ? "● " : "") + t.name + " - MDView";
 }
 
 function setDirty(v) {

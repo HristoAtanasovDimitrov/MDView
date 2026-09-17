@@ -56,7 +56,7 @@ jobs:
             sleep 2
             "$APP" /tmp/test.md &
             # The app mirrors the opened document into the native window
-            # title ("test.md — MDView"), so probe it with xdotool.
+            # title ("test.md - MDView"), so probe it with xdotool.
             ok=""
             for i in $(seq 1 60); do
               sleep 1

@@ -708,7 +708,7 @@ function setDirty(v) {
   saveState.textContent = v ? "unsaved changes" : "saved";
   saveState.classList.toggle("dirty", v);
   btnSave.disabled = !v;
-  document.title = (v ? "● " : "") + currentName + " — MDView";
+  document.title = (v ? "● " : "") + currentName + " - MDView";
 }
 
 function setFile(name, handle) {
