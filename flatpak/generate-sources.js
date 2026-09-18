@@ -12,7 +12,9 @@ const args = [
   path.join(__dirname, "cargo-sources.json"),
 ];
 
-for (const py of ["python3", "python", "py"]) {
+const interpreters =
+  process.platform === "win32" ? ["py", "python", "python3"] : ["python3", "python"];
+for (const py of interpreters) {
   const cmd = py === "py" ? [py, ["-3", ...args]] : [py, args];
   const res = spawnSync(cmd[0], cmd[1], { stdio: "inherit" });
   if (res.error && res.error.code === "ENOENT") continue;

@@ -71,6 +71,8 @@ jobs:
 
       - name: Verify the rpm installs on Rocky Linux 10
         if: matrix.os == 'ubuntu-latest'
+        # Advisory: a Docker Hub or EPEL outage must not withhold the artifacts
+        continue-on-error: true
         run: |
           set -e
           ls src-tauri/target/release/bundle/rpm/*.rpm

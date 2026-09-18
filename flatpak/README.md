@@ -21,5 +21,3 @@ the entry count rather than reviewing it line by line.
 `flatpak-cargo-generator.py` is vendored unmodified (MIT) from
 [flatpak-builder-tools](https://github.com/flatpak/flatpak-builder-tools)
 `cargo/flatpak-cargo-generator.py` @ `f03a673abe6ce189cea1c2857e2b44af2dd79d1f`, fetched 2026-09-18.
-
-(FLATHUB.md does not exist yet - a later task creates it; the reference is intentional.)

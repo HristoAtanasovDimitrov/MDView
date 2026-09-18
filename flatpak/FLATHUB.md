@@ -27,11 +27,16 @@
       - type: git
         url: https://github.com/HristoAtanasovDimitrov/MDView.git
         tag: v2.1.0
+        commit: <sha of that tag>
         x-checker-data:
           type: git
           tag-pattern: ^v([\d.]+)$
       - cargo-sources.json
    ```
+
+   Fill `commit` with the tag's commit sha (`git rev-list -n 1 vX.Y.Z`);
+   Flathub expects git sources pinned by both, and the external-data-checker
+   maintains both on bumps.
 
 4. Lint the copied manifest before opening the PR (the linter that Flathub
    runs on submissions). This runs on a Linux box:
@@ -53,11 +58,17 @@
    docs), typically raised during submission review - reference the
    argv/CLI-opens justification above when filing it.
 
-5. Commit, push, and open a PR against the `new-pr` branch of
+5. Before the first submission, do one manual install check on real
+   distros: `flatpak-builder --user --install --force-clean
+   flatpak/build-dir flatpak/io.github.hristoatanasovdimitrov.MDView.yml`
+   (from this repo, on a Linux box), then open a `.md` file - ideally
+   once on an Arch/Omarchy VM and once on a Rocky VM.
+
+6. Commit, push, and open a PR against the `new-pr` branch of
    `flathub/flathub`. Follow the PR template checklist. A test build runs on
    the PR; reviewers may request manifest tweaks (normal iteration).
 
-6. After the app repo `flathub/io.github.hristoatanasovdimitrov.MDView` is
+7. After the app repo `flathub/io.github.hristoatanasovdimitrov.MDView` is
    created, verify the app at https://flathub.org/apps/manage using the
    "Log in with GitHub" flow (the io.github.* ID makes this automatic).
 
@@ -76,7 +87,11 @@
   git commit -am "Update cargo sources for vX.Y.Z"
   ```
 
-- The `<releases>` entry in the metainfo is added automatically by the
-  readme-bump workflow when a release is tagged.
+- **Before tagging a release**, run the "README version bump" workflow
+  (workflow_dispatch, version input = the upcoming vX.Y.Z) and let it
+  commit to main, so the tag itself carries the new metainfo
+  `<release>` entry - the Flathub build uses the tag's copy. The
+  automatic post-publish run of the same workflow is only a safety net;
+  relying on it leaves the Flathub store page one release behind.
 - If the release changed the README screenshots, also update the pinned
   screenshot URLs in the metainfo (they reference an immutable tag).
