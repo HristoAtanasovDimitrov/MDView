@@ -3,6 +3,7 @@ name: Smoke test
 on:
   workflow_dispatch:
   push:
+    branches: ["main"]
     paths:
       - "flatpak/**"
       - "src-tauri/Cargo.lock"
@@ -93,7 +94,12 @@ jobs:
       - name: Install flatpak-builder and validators
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder appstream desktop-file-utils
+          sudo apt-get install -y flatpak flatpak-builder appstream appstream-compose desktop-file-utils
+
+      - name: Allow unprivileged user namespaces for bwrap
+        # Ubuntu 24.04 images can restrict unprivileged userns, which breaks
+        # flatpak-builder's bubblewrap sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
 
       - name: Validate desktop entry and metainfo
         run: |
@@ -113,13 +119,15 @@ jobs:
         # runtime bump drops it from the Platform, fail here instead of
         # shipping a flatpak that crashes at launch.
         run: |
-          flatpak run --command=sh org.gnome.Platform//50 -c \
+          flatpak run --user --command=sh org.gnome.Platform//50 -c \
             'ls /usr/lib/*/libwebkit2gtk-4.1.so.0'
 
       - name: Build the flatpak from the local checkout
         run: |
+          df -h /
           flatpak-builder --user --force-clean --disable-rofiles-fuse \
             flatpak/build-dir flatpak/io.github.hristoatanasovdimitrov.MDView.yml
+          df -h /
 
       - name: Check the built app ships the binary and metadata
         run: |
