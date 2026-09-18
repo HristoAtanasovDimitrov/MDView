@@ -1,0 +1,59 @@
+name: Flatpak install test
+
+# Installs a release's flatpak bundle inside Rocky Linux containers and
+# launches the app headless - the automated stand-in for the "try it on a
+# Rocky VM" check. Manual dispatch only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag whose flatpak bundle to test (e.g. v2.1.0)"
+        required: true
+        type: string
+
+jobs:
+  rocky:
+    strategy:
+      fail-fast: false
+      matrix:
+        rocky: ["8", "9", "10"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Download the bundle from the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.flatpak'
+          ls -l ./*.flatpak
+
+      - name: Install and launch inside Rocky ${{ matrix.rocky }}
+        run: |
+          # --privileged: bubblewrap needs user namespaces inside the container
+          docker run --rm --privileged -v "$PWD:/work:ro" \
+            rockylinux/rockylinux:${{ matrix.rocky }} bash -ec '
+              dnf install -y flatpak xorg-x11-server-Xvfb dbus-daemon dbus-tools procps-ng
+              flatpak --version
+              flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+              # Pulls the GNOME runtime dependency from Flathub automatically
+              flatpak install --user -y /work/*.flatpak
+              flatpak list --user
+              Xvfb :99 -screen 0 1280x800x24 &
+              sleep 2
+              export DISPLAY=:99
+              printf "# Rocky test\n\nHello from Rocky\n" > /tmp/test.md
+              if command -v dbus-run-session >/dev/null; then RUNNER="dbus-run-session --"; else RUNNER=""; fi
+              # WebKitGTK compositing/DMA-BUF renderers fail on headless CI
+              $RUNNER flatpak run --user \
+                --env=WEBKIT_DISABLE_COMPOSITING_MODE=1 \
+                --env=WEBKIT_DISABLE_DMABUF_RENDERER=1 \
+                io.github.hristoatanasovdimitrov.MDView /tmp/test.md &
+              APP_PID=$!
+              sleep 25
+              # The app must still be alive (it exits fast on webview failure)
+              kill -0 "$APP_PID"
+              pgrep -af mdview || true
+              echo "FLATPAK RUN OK on Rocky"
+            '
