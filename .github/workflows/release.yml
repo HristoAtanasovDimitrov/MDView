@@ -74,8 +74,17 @@ jobs:
         run: |
           set -e
           ls src-tauri/target/release/bundle/rpm/*.rpm
+          # Docker Hub anonymous pulls from shared runner IPs get rate-limited
+          # intermittently; retry like the upload step does
+          for attempt in 1 2 3; do
+            docker pull rockylinux/rockylinux:10 && break
+            echo "docker pull attempt $attempt failed; retrying in 30s"
+            sleep 30
+          done
           docker run --rm -v "$PWD/src-tauri/target/release/bundle/rpm:/rpms:ro" \
             rockylinux/rockylinux:10 bash -ec '
+              # EPEL on EL10 is minor-version-pinned (unlike epel8/epel9); if this
+              # install breaks, suspect EPEL/Rocky packaging, not MDView
               dnf install -y epel-release
               dnf install -y /rpms/*.rpm
               bin=$(rpm -qlp /rpms/*.rpm | grep "^/usr/bin/" | head -n1)
