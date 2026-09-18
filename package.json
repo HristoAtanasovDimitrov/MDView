@@ -10,7 +10,8 @@
     "sync": "node sync.js",
     "start": "tauri dev",
     "dist": "tauri build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "flatpak:sources": "python flatpak/flatpak-cargo-generator.py src-tauri/Cargo.lock -o flatpak/cargo-sources.json"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
