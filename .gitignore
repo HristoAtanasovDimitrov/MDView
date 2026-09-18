@@ -10,3 +10,5 @@ src-tauri/gen/
 flatpak/build-dir/
 flatpak/repo/
 MDView_*.flatpak
+
+graphify-out/
