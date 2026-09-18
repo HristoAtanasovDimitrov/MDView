@@ -18,7 +18,7 @@ Grab [2.1.0](https://github.com/HristoAtanasovDimitrov/MDView/releases/tag/v2.1.
 | Platform | File | Notes |
 |----------|------|-------|
 | Windows | [`MDView_2.1.0_x64-setup.exe`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_x64-setup.exe) | ~1 MB. Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
-| macOS | [`MDView_2.1.0_universal.dmg`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_universal.dmg) | One build for Apple Silicon and Intel. Unsigned: right-click the app → Open the first time |
+| macOS | [`MDView_2.1.0_universal.dmg`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_universal.dmg) | One build for Apple Silicon and Intel. Unsigned: Gatekeeper blocks the first launch - see [Opening on macOS](#opening-on-macos) |
 | Linux (any distro) | [`MDView_2.1.0_x86_64.flatpak`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_x86_64.flatpak) | Flatpak bundle: `flatpak install --user MDView_2.1.0_x86_64.flatpak`. Works on Rocky/RHEL 8+, Arch/Omarchy, Ubuntu, and anything else with Flatpak; the shared GNOME runtime is fetched from Flathub on first install |
 | Linux (Ubuntu/Debian) | [`MDView_2.1.0_amd64.deb`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_amd64.deb) | ~2 MB, uses the system WebKitGTK |
 | Linux (Rocky 10/Fedora) | [`MDView-2.1.0-1.x86_64.rpm`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView-2.1.0-1.x86_64.rpm) | On Rocky, enable EPEL first: `sudo dnf install epel-release`. Not installable on Rocky 8/9 (no WebKitGTK 4.1 there - use the Flatpak) |
@@ -29,6 +29,24 @@ the installer from ~80 MB to ~1 MB by rendering in the OS webview (WebView2 on W
 preinstalled on Windows 10/11 - the installer fetches it automatically if missing).
 
 There is also a zero-install flavor: open [MDView.html](MDView.html) in Edge/Chrome.
+
+### Opening on macOS
+
+The app is not signed with an Apple Developer ID, so the first launch shows
+*"Apple could not verify MDView is free of malware"*. This is Gatekeeper flagging
+the missing signature, not actual malware. To open it anyway:
+
+1. Dismiss the warning, then go to **System Settings → Privacy & Security**,
+   scroll down to *"MDView was blocked to protect your Mac"*, and click
+   **Open Anyway**. (On macOS 15 Sequoia this is the only GUI route -
+   right-click → Open no longer bypasses Gatekeeper.)
+2. Or clear the quarantine flag from a terminal:
+
+   ```sh
+   xattr -cr /Applications/MDView.app
+   ```
+
+Either way, macOS only asks once per installed version.
 
 ## Features
 
