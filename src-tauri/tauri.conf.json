@@ -26,7 +26,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "dmg", "appimage", "deb"],
+    "targets": ["nsis", "dmg", "appimage", "deb", "rpm"],
     "icon": ["icons/icon.ico", "icons/icon.icns", "icons/icon.png"],
     "category": "Productivity",
     "shortDescription": "Dark markdown viewer and editor",
