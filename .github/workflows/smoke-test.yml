@@ -114,6 +114,7 @@ jobs:
         run: |
           # GNOME 50 is based on freedesktop-sdk 25.08; keep the extension
           # branches in lockstep with the runtime version when bumping
+          # (keep in sync with the flatpak-bundle job in release.yml)
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           flatpak install --user -y flathub \
             org.gnome.Platform//50 org.gnome.Sdk//50 \

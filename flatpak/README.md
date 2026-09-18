@@ -26,7 +26,7 @@ the entry count rather than reviewing it line by line.
 
 Distribution is GitHub-only by choice (2026-09-18): each release carries a
 `MDView_<version>_x86_64.flatpak` bundle. The bundle embeds
-`--runtime-repo` pointing at Flathub, so `flatpak install <file>` offers to
+`--runtime-repo` pointing at Flathub, so `flatpak install --user <file>` offers to
 fetch the GNOME runtime automatically. The app itself is not published on
 Flathub; if that ever changes, the manifest here is the starting point (a
 Flathub copy would swap the `type: dir` source for a git source pinned to a

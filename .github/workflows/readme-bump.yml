@@ -33,7 +33,7 @@ jobs:
           sed -E -i "s#(releases/(tag|download)/v)[0-9]+\.[0-9]+\.[0-9]+#\1${VER}#g" README.md
           sed -E -i "s/\[[0-9]+\.[0-9]+\.[0-9]+\]\(https/[${VER}](https/g" README.md
           # Prepend a <release> entry to the flatpak metainfo if this version
-          # is not recorded yet (Flathub requires an entry per release).
+          # is not recorded yet (appstream metadata must record each release).
           META="flatpak/io.github.hristoatanasovdimitrov.MDView.metainfo.xml"
           if [ -f "$META" ] && ! grep -q "version=\"${VER}\"" "$META"; then
             sed -i "s#<releases>#<releases>\n    <release version=\"${VER}\" date=\"$(date +%F)\"/>#" "$META"

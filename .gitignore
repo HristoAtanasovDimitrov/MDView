@@ -9,3 +9,4 @@ src-tauri/gen/
 .flatpak-builder/
 flatpak/build-dir/
 flatpak/repo/
+MDView_*.flatpak

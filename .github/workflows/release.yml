@@ -136,6 +136,8 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.bundle-tag || github.ref }}
 
       - name: Install flatpak-builder
         run: |
@@ -151,6 +153,7 @@ jobs:
         run: |
           # GNOME 50 is based on freedesktop-sdk 25.08; keep the extension
           # branches in lockstep with the runtime version when bumping
+          # (keep in sync with the flatpak job in smoke-test.yml)
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           flatpak install --user -y flathub \
             org.gnome.Platform//50 org.gnome.Sdk//50 \
@@ -162,7 +165,7 @@ jobs:
           flatpak-builder --user --force-clean --disable-rofiles-fuse \
             --repo=flatpak/repo \
             flatpak/build-dir flatpak/io.github.hristoatanasovdimitrov.MDView.yml
-          TAG="${{ inputs.bundle-tag }}"
+          TAG="$INPUT_BUNDLE_TAG"
           if [ -z "$TAG" ] && [ "${GITHUB_REF#refs/tags/}" != "$GITHUB_REF" ]; then
             TAG="$GITHUB_REF_NAME"
           fi
@@ -170,12 +173,15 @@ jobs:
           [ -n "$VERSION" ] || VERSION=dev
           # --runtime-repo lets `flatpak install ./MDView_*.flatpak` offer the
           # Flathub remote automatically for the GNOME runtime dependency
-          flatpak build-bundle flatpak/repo \
+          flatpak build-bundle \
+            --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
+            flatpak/repo \
             "MDView_${VERSION}_x86_64.flatpak" \
-            io.github.hristoatanasovdimitrov.MDView \
-            --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo
+            io.github.hristoatanasovdimitrov.MDView
           ls -l MDView_*.flatpak
           echo "BUNDLE_TAG=$TAG" >> "$GITHUB_ENV"
+        env:
+          INPUT_BUNDLE_TAG: ${{ inputs.bundle-tag }}
 
       - name: Upload the bundle to the release
         if: env.BUNDLE_TAG != ''
@@ -195,7 +201,7 @@ jobs:
   publish:
     needs: [build, flatpak-bundle]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: always() && needs.build.result == 'success' && startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Publish the release (uploads go to a draft)
         run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest
