@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=MDView
+Comment=Dark markdown viewer and editor
+Exec=mdview %F
+Icon=io.github.hristoatanasovdimitrov.MDView
+Terminal=false
+Categories=Utility;TextEditor;
+MimeType=text/markdown;
+StartupWMClass=MDView

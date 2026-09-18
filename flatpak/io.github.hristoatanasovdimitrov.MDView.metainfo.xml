@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.hristoatanasovdimitrov.MDView</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>MDView</name>
+  <summary>Dark markdown viewer and editor</summary>
+  <description>
+    <p>
+      A fast, simple Markdown viewer and editor. Reading view with book-style
+      serif typography, tabs restored across launches, an edit mode with split
+      live preview, find and search-and-replace with regular expressions, and
+      clickable task-list checkboxes that edit the source document.
+    </p>
+    <p>
+      The markdown renderer is dependency-free and covers headings, emphasis,
+      code, lists, task lists, tables, blockquotes, links, images, and
+      horizontal rules.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.hristoatanasovdimitrov.MDView.desktop</launchable>
+  <url type="homepage">https://github.com/HristoAtanasovDimitrov/MDView</url>
+  <url type="bugtracker">https://github.com/HristoAtanasovDimitrov/MDView/issues</url>
+  <url type="vcs-browser">https://github.com/HristoAtanasovDimitrov/MDView</url>
+  <developer id="io.github.hristoatanasovdimitrov">
+    <name>Hristo Dimitrov</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/HristoAtanasovDimitrov/MDView/main/docs/screenshot-view.png</image>
+      <caption>Reading view</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/HristoAtanasovDimitrov/MDView/main/docs/screenshot-edit.png</image>
+      <caption>Edit mode with split live preview</caption>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="2.0.0" date="2026-09-17"/>
+  </releases>
+</component>
