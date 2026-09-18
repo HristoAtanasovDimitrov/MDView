@@ -28,11 +28,11 @@
   <content_rating type="oars-1.1"/>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/HristoAtanasovDimitrov/MDView/main/docs/screenshot-view.png</image>
+      <image>https://raw.githubusercontent.com/HristoAtanasovDimitrov/MDView/v2.0.0/docs/screenshot-view.png</image>
       <caption>Reading view</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/HristoAtanasovDimitrov/MDView/main/docs/screenshot-edit.png</image>
+      <image>https://raw.githubusercontent.com/HristoAtanasovDimitrov/MDView/v2.0.0/docs/screenshot-edit.png</image>
       <caption>Edit mode with split live preview</caption>
     </screenshot>
   </screenshots>
