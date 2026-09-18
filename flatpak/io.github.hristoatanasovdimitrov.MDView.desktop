@@ -7,4 +7,5 @@ Icon=io.github.hristoatanasovdimitrov.MDView
 Terminal=false
 Categories=Utility;TextEditor;
 MimeType=text/markdown;
+Keywords=markdown;md;viewer;editor;
 StartupWMClass=mdview

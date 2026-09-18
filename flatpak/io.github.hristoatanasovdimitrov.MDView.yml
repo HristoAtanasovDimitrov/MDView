@@ -4,7 +4,7 @@
 # tag instead - see flatpak/FLATHUB.md.
 app-id: io.github.hristoatanasovdimitrov.MDView
 runtime: org.gnome.Platform
-runtime-version: '48'
+runtime-version: '50'
 sdk: org.gnome.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
@@ -32,11 +32,13 @@ modules:
       # sync.js inlines src/shim.js into src/index.html; tauri's codegen then
       # embeds src/ into the binary at compile time, so no bundler is needed.
       - node sync.js
-      - cargo --offline build --release --manifest-path src-tauri/Cargo.toml
+      - cargo --offline --locked build --release --manifest-path src-tauri/Cargo.toml
       - install -Dm755 src-tauri/target/release/mdview /app/bin/mdview
       - install -Dm644 src-tauri/icons/icon.png /app/share/icons/hicolor/512x512/apps/io.github.hristoatanasovdimitrov.MDView.png
       - install -Dm644 flatpak/io.github.hristoatanasovdimitrov.MDView.desktop /app/share/applications/io.github.hristoatanasovdimitrov.MDView.desktop
       - install -Dm644 flatpak/io.github.hristoatanasovdimitrov.MDView.metainfo.xml /app/share/metainfo/io.github.hristoatanasovdimitrov.MDView.metainfo.xml
+      - desktop-file-validate /app/share/applications/io.github.hristoatanasovdimitrov.MDView.desktop
+      - appstreamcli validate --no-net /app/share/metainfo/io.github.hristoatanasovdimitrov.MDView.metainfo.xml
     sources:
       - type: dir
         path: ..
@@ -45,4 +47,7 @@ modules:
           - node_modules
           - dist
           - .git
+          - .flatpak-builder
+          - flatpak/build-dir
+          - flatpak/repo
       - cargo-sources.json
