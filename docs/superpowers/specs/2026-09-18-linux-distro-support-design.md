@@ -122,3 +122,14 @@ standard command for their platform:
 - Manual, once: install from Flathub beta channel (or local
   `flatpak-builder --install`) on an Arch and a Rocky VM before first
   publish.
+
+## Revision 2026-09-18: GitHub-only distribution
+
+After v2.1.0 shipped, the owner decided the Flatpak stays GitHub-only: a
+`MDView_<version>_x86_64.flatpak` bundle is built by the `flatpak-bundle`
+job in release.yml and attached to each release (backfillable onto an
+existing tag via the workflow's `bundle-tag` dispatch input). The Flathub
+submission (spec section 3, FLATHUB.md) is retired; users add the Flathub
+remote only as the runtime source, which `flatpak install <bundle>` offers
+automatically via the embedded `--runtime-repo`. Trade-off accepted: no
+auto-updates or store listing; per-release manual install instead.

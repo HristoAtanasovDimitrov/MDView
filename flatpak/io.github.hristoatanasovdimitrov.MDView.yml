@@ -1,7 +1,7 @@
 # Flatpak manifest for MDView, built from source.
 # This copy builds the local checkout (type: dir) and is what CI validates.
-# The Flathub copy of this manifest uses a git source pinned to a release
-# tag instead - see flatpak/FLATHUB.md.
+# Releases attach a single-file bundle built from this manifest
+# (flatpak-bundle job in .github/workflows/release.yml).
 app-id: io.github.hristoatanasovdimitrov.MDView
 runtime: org.gnome.Platform
 runtime-version: '50'
