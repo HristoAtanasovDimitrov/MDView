@@ -55,8 +55,8 @@ fn save_file(path: String, content: String) -> Result<bool, String> {
 }
 
 fn main() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+    let mut single_instance = tauri_plugin_single_instance::Builder::new().callback(
+        |app: &tauri::AppHandle, argv: Vec<String>, _cwd: String| {
             if let Some(win) = app.get_webview_window("main") {
                 let _ = win.unminimize();
                 let _ = win.set_focus();
@@ -66,7 +66,17 @@ fn main() {
                     let _ = app.emit("open-path", doc);
                 }
             }
-        }))
+        },
+    );
+    // Inside Flatpak the D-Bus proxy only lets us own names under the
+    // sandbox app id, so base the plugin's well-known name on FLATPAK_ID
+    // there instead of the (unrelated) Tauri bundle identifier.
+    if let Ok(flatpak_id) = env::var("FLATPAK_ID") {
+        single_instance = single_instance.dbus_id(flatpak_id);
+    }
+
+    tauri::Builder::default()
+        .plugin(single_instance.build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .manage(Pending::default())
