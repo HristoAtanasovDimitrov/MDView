@@ -69,6 +69,25 @@ jobs:
         with:
           args: ${{ matrix.args }}
 
+      - name: Verify the rpm installs on Rocky Linux 10
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          set -e
+          ls src-tauri/target/release/bundle/rpm/*.rpm
+          docker run --rm -v "$PWD/src-tauri/target/release/bundle/rpm:/rpms:ro" \
+            rockylinux/rockylinux:10 bash -ec '
+              dnf install -y epel-release
+              dnf install -y /rpms/*.rpm
+              bin=$(rpm -qlp /rpms/*.rpm | grep "^/usr/bin/" | head -n1)
+              echo "installed binary: $bin"
+              test -x "$bin"
+              ldd "$bin" | tee /tmp/ldd.out
+              if grep -q "not found" /tmp/ldd.out; then
+                echo "FAIL: unresolved shared libraries"; exit 1
+              fi
+              echo "RPM INSTALL OK on Rocky 10"
+            '
+
       - name: Upload bundles to the draft release
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
