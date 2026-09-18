@@ -50,4 +50,5 @@ modules:
           - .flatpak-builder
           - flatpak/build-dir
           - flatpak/repo
+          - flatpak/.flatpak-builder
       - cargo-sources.json

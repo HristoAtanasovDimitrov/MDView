@@ -2,9 +2,16 @@ name: Smoke test
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "flatpak/**"
+      - "src-tauri/Cargo.lock"
 
 jobs:
   smoke:
+    # The app-launch smoke test is manual-only; pushes to flatpak files
+    # trigger just the flatpak job below.
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -76,3 +83,47 @@ jobs:
             kill -0 "$APP_PID" || { echo "FAIL: app exited during startup"; exit 1; }
           fi
           echo "SMOKE TEST PASSED on $RUNNER_OS"
+
+  flatpak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install flatpak-builder and validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder appstream desktop-file-utils
+
+      - name: Validate desktop entry and metainfo
+        run: |
+          desktop-file-validate flatpak/io.github.hristoatanasovdimitrov.MDView.desktop
+          appstreamcli validate --no-net flatpak/io.github.hristoatanasovdimitrov.MDView.metainfo.xml
+
+      - name: Install the GNOME runtime and SDK extensions
+        run: |
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub \
+            org.gnome.Platform//50 org.gnome.Sdk//50 \
+            org.freedesktop.Sdk.Extension.rust-stable//25.08 \
+            org.freedesktop.Sdk.Extension.node22//25.08
+
+      - name: Check the runtime still ships WebKitGTK 4.1
+        # webkit2gtk-4.1 is under deprecation discussion upstream; if a future
+        # runtime bump drops it from the Platform, fail here instead of
+        # shipping a flatpak that crashes at launch.
+        run: |
+          flatpak run --command=sh org.gnome.Platform//50 -c \
+            'ls /usr/lib/*/libwebkit2gtk-4.1.so.0'
+
+      - name: Build the flatpak from the local checkout
+        run: |
+          flatpak-builder --user --force-clean --disable-rofiles-fuse \
+            flatpak/build-dir flatpak/io.github.hristoatanasovdimitrov.MDView.yml
+
+      - name: Check the built app ships the binary and metadata
+        run: |
+          test -x flatpak/build-dir/files/bin/mdview
+          test -f flatpak/build-dir/files/share/applications/io.github.hristoatanasovdimitrov.MDView.desktop
+          test -f flatpak/build-dir/files/share/metainfo/io.github.hristoatanasovdimitrov.MDView.metainfo.xml
+          echo "FLATPAK BUILD OK"
