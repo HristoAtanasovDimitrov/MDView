@@ -5,3 +5,7 @@ Thumbs.db
 src/index.html
 src-tauri/target/
 src-tauri/gen/
+
+.flatpak-builder/
+flatpak/build-dir/
+flatpak/repo/

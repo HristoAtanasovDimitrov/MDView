@@ -1,0 +1,48 @@
+# Flatpak manifest for MDView, built from source.
+# This copy builds the local checkout (type: dir) and is what CI validates.
+# The Flathub copy of this manifest uses a git source pinned to a release
+# tag instead - see flatpak/FLATHUB.md.
+app-id: io.github.hristoatanasovdimitrov.MDView
+runtime: org.gnome.Platform
+runtime-version: '48'
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+  - org.freedesktop.Sdk.Extension.node22
+command: mdview
+finish-args:
+  # Standard GUI access
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Markdown documents may embed remote images
+  - --share=network
+  # Open/save arbitrary .md files like a native editor (CLI opens included)
+  - --filesystem=host
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node22/bin
+modules:
+  - name: mdview
+    buildsystem: simple
+    build-options:
+      env:
+        CARGO_HOME: /run/build/mdview/cargo
+    build-commands:
+      # sync.js inlines src/shim.js into src/index.html; tauri's codegen then
+      # embeds src/ into the binary at compile time, so no bundler is needed.
+      - node sync.js
+      - cargo --offline build --release --manifest-path src-tauri/Cargo.toml
+      - install -Dm755 src-tauri/target/release/mdview /app/bin/mdview
+      - install -Dm644 src-tauri/icons/icon.png /app/share/icons/hicolor/512x512/apps/io.github.hristoatanasovdimitrov.MDView.png
+      - install -Dm644 flatpak/io.github.hristoatanasovdimitrov.MDView.desktop /app/share/applications/io.github.hristoatanasovdimitrov.MDView.desktop
+      - install -Dm644 flatpak/io.github.hristoatanasovdimitrov.MDView.metainfo.xml /app/share/metainfo/io.github.hristoatanasovdimitrov.MDView.metainfo.xml
+    sources:
+      - type: dir
+        path: ..
+        skip:
+          - src-tauri/target
+          - node_modules
+          - dist
+          - .git
+      - cargo-sources.json
