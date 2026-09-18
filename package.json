@@ -11,7 +11,7 @@
     "start": "tauri dev",
     "dist": "tauri build",
     "tauri": "tauri",
-    "flatpak:sources": "python flatpak/flatpak-cargo-generator.py src-tauri/Cargo.lock -o flatpak/cargo-sources.json"
+    "flatpak:sources": "node flatpak/generate-sources.js"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
