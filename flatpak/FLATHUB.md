@@ -34,9 +34,12 @@
    ```
 
 4. Lint the copied manifest before opening the PR (the linter that Flathub
-   runs on submissions):
+   runs on submissions). This runs on a Linux box:
 
    ```bash
+   # Linux only; install the linter once
+   flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+   flatpak install --user -y flathub org.flatpak.Builder
    flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.hristoatanasovdimitrov.MDView.yml
    ```
 
@@ -44,8 +47,11 @@
    `--filesystem=host`. That access is required because MDView is a file
    editor whose windows are opened from the command line and from file
    associations (`Exec=mdview %F`): paths arrive as plain argv, which
-   cannot go through the documents portal. Request the exception in the
-   submission PR with that justification (reviewers grant it case by case).
+   cannot go through the documents portal. The exception is granted via a
+   pull request against the exceptions file in the
+   `flathub-infra/flatpak-builder-lint` repository (linked from the linter's
+   docs), typically raised during submission review - reference the
+   argv/CLI-opens justification above when filing it.
 
 5. Commit, push, and open a PR against the `new-pr` branch of
    `flathub/flathub`. Follow the PR template checklist. A test build runs on

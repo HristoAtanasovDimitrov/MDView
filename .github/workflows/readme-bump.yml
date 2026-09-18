@@ -35,7 +35,7 @@ jobs:
           # Prepend a <release> entry to the flatpak metainfo if this version
           # is not recorded yet (Flathub requires an entry per release).
           META="flatpak/io.github.hristoatanasovdimitrov.MDView.metainfo.xml"
-          if ! grep -q "version=\"${VER}\"" "$META"; then
+          if [ -f "$META" ] && ! grep -q "version=\"${VER}\"" "$META"; then
             sed -i "s#<releases>#<releases>\n    <release version=\"${VER}\" date=\"$(date +%F)\"/>#" "$META"
           fi
           if git diff --quiet; then
@@ -43,7 +43,12 @@ jobs:
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add README.md "$META"
+            git add README.md; [ -f "$META" ] && git add "$META" || true
             git commit -m "Bump README links and flatpak metainfo to ${VER}"
-            git push origin main
+            for attempt in 1 2 3; do
+              if git push origin main; then exit 0; fi
+              echo "push attempt $attempt failed; rebasing and retrying"
+              git pull --rebase origin main
+            done
+            exit 1
           fi
