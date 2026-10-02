@@ -54,7 +54,7 @@ Either way, macOS only asks once per installed version.
 - Tabs: open several files at once (`Ctrl+T` / `Ctrl+W` / `Ctrl+Tab`),
   restored automatically on the next launch
 - Recent-files menu with the last dozen opened documents
-- Clickable task-list checkboxes in the reading view - toggling one edits the source
+- Clickable task-list checkboxes in the reading view - toggling one edits the source; bold text inside a checklist item is highlighted in blue so key words stand out
 - Edit mode (`Ctrl+E`) with split live preview
 - Open (`Ctrl+O`, multi-select), Save (`Ctrl+S`), drag & drop
 - Find (`Ctrl+F`) with match highlighting and Enter / Shift+Enter / F3 stepping
