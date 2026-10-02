@@ -13,16 +13,16 @@ A fast, simple Markdown viewer and editor.
 
 ## Download
 
-Grab [2.1.0](https://github.com/HristoAtanasovDimitrov/MDView/releases/tag/v2.1.0) (or the latest from [Releases](https://github.com/HristoAtanasovDimitrov/MDView/releases)):
+Grab [2.2.0](https://github.com/HristoAtanasovDimitrov/MDView/releases/tag/v2.2.0) (or the latest from [Releases](https://github.com/HristoAtanasovDimitrov/MDView/releases)):
 
 | Platform | File | Notes |
 |----------|------|-------|
-| Windows | [`MDView_2.1.0_x64-setup.exe`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_x64-setup.exe) | ~1 MB. Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
-| macOS | [`MDView_2.1.0_universal.dmg`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_universal.dmg) | One build for Apple Silicon and Intel. Unsigned: Gatekeeper blocks the first launch - see [Opening on macOS](#opening-on-macos) |
-| Linux (any distro) | [`MDView_2.1.0_x86_64.flatpak`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_x86_64.flatpak) | Flatpak bundle: `flatpak install --user MDView_2.1.0_x86_64.flatpak`. Works on Rocky/RHEL 8+, Arch/Omarchy, Ubuntu, and anything else with Flatpak; the shared GNOME runtime is fetched from Flathub on first install |
-| Linux (Ubuntu/Debian) | [`MDView_2.1.0_amd64.deb`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_amd64.deb) | ~2 MB, uses the system WebKitGTK |
-| Linux (Rocky 10/Fedora) | [`MDView-2.1.0-1.x86_64.rpm`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView-2.1.0-1.x86_64.rpm) | On Rocky, enable EPEL first: `sudo dnf install epel-release`. Not installable on Rocky 8/9 (no WebKitGTK 4.1 there - use the Flatpak) |
-| Linux (other) | [`MDView_2.1.0_amd64.AppImage`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.1.0/MDView_2.1.0_amd64.AppImage) | Bundles its own WebKitGTK (large). `chmod +x` and run. Needs glibc ≥ the build runner's (Ubuntu 24.04) |
+| Windows | [`MDView_2.2.0_x64-setup.exe`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.2.0/MDView_2.2.0_x64-setup.exe) | ~1 MB. Per-user install, associates `.md` files. Unsigned: SmartScreen may prompt (More info → Run anyway) |
+| macOS | [`MDView_2.2.0_universal.dmg`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.2.0/MDView_2.2.0_universal.dmg) | One build for Apple Silicon and Intel. Unsigned: Gatekeeper blocks the first launch - see [Opening on macOS](#opening-on-macos) |
+| Linux (any distro) | [`MDView_2.2.0_x86_64.flatpak`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.2.0/MDView_2.2.0_x86_64.flatpak) | Flatpak bundle: `flatpak install --user MDView_2.2.0_x86_64.flatpak`. Works on Rocky/RHEL 8+, Arch/Omarchy, Ubuntu, and anything else with Flatpak; the shared GNOME runtime is fetched from Flathub on first install |
+| Linux (Ubuntu/Debian) | [`MDView_2.2.0_amd64.deb`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.2.0/MDView_2.2.0_amd64.deb) | ~2 MB, uses the system WebKitGTK |
+| Linux (Rocky 10/Fedora) | [`MDView-2.2.0-1.x86_64.rpm`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.2.0/MDView-2.2.0-1.x86_64.rpm) | On Rocky, enable EPEL first: `sudo dnf install epel-release`. Not installable on Rocky 8/9 (no WebKitGTK 4.1 there - use the Flatpak) |
+| Linux (other) | [`MDView_2.2.0_amd64.AppImage`](https://github.com/HristoAtanasovDimitrov/MDView/releases/download/v2.2.0/MDView_2.2.0_amd64.AppImage) | Bundles its own WebKitGTK (large). `chmod +x` and run. Needs glibc ≥ the build runner's (Ubuntu 24.04) |
 
 Since 2.0 MDView is built with [Tauri](https://tauri.app) instead of Electron, shrinking
 the installer from ~80 MB to ~1 MB by rendering in the OS webview (WebView2 on Windows,
